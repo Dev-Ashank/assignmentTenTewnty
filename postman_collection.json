@@ -1,0 +1,683 @@
+{
+  "info": {
+    "name": "Contest Participation System",
+    "description": "Complete API collection for the Contest Participation System.\n\n**Setup:**\n1. Register or login to get a JWT token\n2. The token is auto-saved to the `token` variable\n3. All authenticated endpoints use it automatically\n\n**Test Users (after seeding):**\n- admin / password123 (Admin)\n- vip_user / password123 (VIP)\n- normal_user / password123 (Normal User)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "contestId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "questionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.accessToken) {",
+                  "    pm.collectionVariables.set('token', jsonData.accessToken);",
+                  "}",
+                  "if (jsonData.user && jsonData.user.id) {",
+                  "    pm.collectionVariables.set('userId', jsonData.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"john_doe\",\n    \"email\": \"john@example.com\",\n    \"password\": \"SecureP@ss123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Register a new user account. Returns a JWT token on success."
+          },
+          "response": []
+        },
+        {
+          "name": "Register Admin User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.accessToken) {",
+                  "    pm.collectionVariables.set('token', jsonData.accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"admin_user\",\n    \"email\": \"admin@example.com\",\n    \"password\": \"AdminP@ss123\",\n    \"role\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Register an admin user (for testing admin-only endpoints)."
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.accessToken) {",
+                  "    pm.collectionVariables.set('token', jsonData.accessToken);",
+                  "}",
+                  "if (jsonData.user && jsonData.user.id) {",
+                  "    pm.collectionVariables.set('userId', jsonData.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"admin\",\n    \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Login with credentials. Use seeded users: admin, vip_user, or normal_user (password: password123)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/profile",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "profile"]
+            },
+            "description": "Get the current authenticated user's profile."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Update User Role (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"role\": \"vip\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/{{userId}}/role",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{userId}}", "role"]
+            },
+            "description": "Update a user's role. Admin only. Valid roles: admin, vip, user, guest."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Contests",
+      "item": [
+        {
+          "name": "Create Contest (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.contest && jsonData.contest.id) {",
+                  "    pm.collectionVariables.set('contestId', jsonData.contest.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"General Knowledge Quiz\",\n    \"description\": \"Test your general knowledge with this fun quiz!\",\n    \"accessLevel\": \"normal\",\n    \"startTime\": \"2025-01-01T00:00:00Z\",\n    \"endTime\": \"2026-12-31T23:59:59Z\",\n    \"prizeInfo\": \"$200 Gift Card for the winner!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/contests",
+              "host": ["{{base_url}}"],
+              "path": ["contests"]
+            },
+            "description": "Create a new contest. Admin only."
+          },
+          "response": []
+        },
+        {
+          "name": "List All Contests",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/contests",
+              "host": ["{{base_url}}"],
+              "path": ["contests"]
+            },
+            "description": "List all available contests. Results filtered by user role."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Contest Details",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.contest && jsonData.contest.questions && jsonData.contest.questions.length > 0) {",
+                  "    pm.collectionVariables.set('questionId', jsonData.contest.questions[0].id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/contests/{{contestId}}",
+              "host": ["{{base_url}}"],
+              "path": ["contests", "{{contestId}}"]
+            },
+            "description": "Get full contest details including questions (answers hidden)."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Contest (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Updated Quiz Name\",\n    \"description\": \"Updated description\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/contests/{{contestId}}",
+              "host": ["{{base_url}}"],
+              "path": ["contests", "{{contestId}}"]
+            },
+            "description": "Update contest details. Admin only."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Contest (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/contests/{{contestId}}",
+              "host": ["{{base_url}}"],
+              "path": ["contests", "{{contestId}}"]
+            },
+            "description": "Delete a contest and all associated data. Admin only."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Questions",
+      "item": [
+        {
+          "name": "Add Question (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.question && jsonData.question.id) {",
+                  "    pm.collectionVariables.set('questionId', jsonData.question.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"questionText\": \"What is the capital of France?\",\n    \"type\": \"single_select\",\n    \"options\": [\"Paris\", \"London\", \"Berlin\", \"Madrid\"],\n    \"correctAnswers\": [\"Paris\"],\n    \"points\": 10,\n    \"orderIndex\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/contests/{{contestId}}/questions",
+              "host": ["{{base_url}}"],
+              "path": ["contests", "{{contestId}}", "questions"]
+            },
+            "description": "Add a question to a contest. Admin only."
+          },
+          "response": []
+        },
+        {
+          "name": "Add Multi-Select Question (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"questionText\": \"Select all prime numbers:\",\n    \"type\": \"multi_select\",\n    \"options\": [\"2\", \"4\", \"5\", \"9\", \"11\"],\n    \"correctAnswers\": [\"2\", \"5\", \"11\"],\n    \"points\": 15,\n    \"orderIndex\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/contests/{{contestId}}/questions",
+              "host": ["{{base_url}}"],
+              "path": ["contests", "{{contestId}}", "questions"]
+            },
+            "description": "Add a multi-select question."
+          },
+          "response": []
+        },
+        {
+          "name": "Add True/False Question (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"questionText\": \"The Earth is flat.\",\n    \"type\": \"true_false\",\n    \"options\": [\"True\", \"False\"],\n    \"correctAnswers\": [\"False\"],\n    \"points\": 5,\n    \"orderIndex\": 3\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/contests/{{contestId}}/questions",
+              "host": ["{{base_url}}"],
+              "path": ["contests", "{{contestId}}", "questions"]
+            },
+            "description": "Add a true/false question."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Contest Questions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/contests/{{contestId}}/questions",
+              "host": ["{{base_url}}"],
+              "path": ["contests", "{{contestId}}", "questions"]
+            },
+            "description": "Get all questions for a contest. Correct answers are hidden."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Question (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"questionText\": \"Updated question text?\",\n    \"points\": 20\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/contests/{{contestId}}/questions/{{questionId}}",
+              "host": ["{{base_url}}"],
+              "path": ["contests", "{{contestId}}", "questions", "{{questionId}}"]
+            },
+            "description": "Update a question. Admin only."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Question (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/contests/{{contestId}}/questions/{{questionId}}",
+              "host": ["{{base_url}}"],
+              "path": ["contests", "{{contestId}}", "questions", "{{questionId}}"]
+            },
+            "description": "Delete a question. Admin only."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Participation",
+      "item": [
+        {
+          "name": "Join Contest",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/contests/{{contestId}}/participate",
+              "host": ["{{base_url}}"],
+              "path": ["contests", "{{contestId}}", "participate"]
+            },
+            "description": "Join a contest. Must be a signed-in user or VIP. VIP contests require VIP role."
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Answer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"questionId\": \"{{questionId}}\",\n    \"selectedAnswers\": [\"Paris\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/contests/{{contestId}}/answers",
+              "host": ["{{base_url}}"],
+              "path": ["contests", "{{contestId}}", "answers"]
+            },
+            "description": "Submit an answer to a question. Must have joined the contest first."
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Contest (Get Score)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/contests/{{contestId}}/submit",
+              "host": ["{{base_url}}"],
+              "path": ["contests", "{{contestId}}", "submit"]
+            },
+            "description": "Finish the contest and get your score. Triggers leaderboard update."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Leaderboard",
+      "item": [
+        {
+          "name": "Get Contest Leaderboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/contests/{{contestId}}/leaderboard",
+              "host": ["{{base_url}}"],
+              "path": ["contests", "{{contestId}}", "leaderboard"]
+            },
+            "description": "View the leaderboard for a contest. Shows all participants ranked by score."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Prizes",
+      "item": [
+        {
+          "name": "Award Prize (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/contests/{{contestId}}/prizes/award",
+              "host": ["{{base_url}}"],
+              "path": ["contests", "{{contestId}}", "prizes", "award"]
+            },
+            "description": "Award the prize to the top scorer. Admin only. Contest must have ended."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "User History",
+      "item": [
+        {
+          "name": "Get My History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/me/history",
+              "host": ["{{base_url}}"],
+              "path": ["users", "me", "history"]
+            },
+            "description": "Get all contests you've participated in with scores."
+          },
+          "response": []
+        },
+        {
+          "name": "Get In-Progress Contests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/me/history/in-progress",
+              "host": ["{{base_url}}"],
+              "path": ["users", "me", "history", "in-progress"]
+            },
+            "description": "Get contests you've joined but haven't submitted yet."
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Prizes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/me/prizes",
+              "host": ["{{base_url}}"],
+              "path": ["users", "me", "prizes"]
+            },
+            "description": "Get all prizes you've won."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
